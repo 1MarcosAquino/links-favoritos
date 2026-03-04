@@ -12,11 +12,26 @@
 
     <!-- DataTables -->
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+    <style>
+      body {
+        --brand-bg-color: hsla(190, 41%, 58%, 0.587);
+        --bg-primary: hsl(from var(--brand-bg-color) h s calc(l - 5));
+        --bg-secondary: hsl(from var(--brand-bg-color) h s calc(l + 10));
+      }
+
+      .bg-primary {
+        background-color: var(--bg-primary) !important;
+      }
+      .bg-secondary {
+        background-color: var(--bg-secondary) !important;
+      }
+    </style>
   </head>
 
-  <body>
+  <body class="d-flex justify-content-center align-items-center vh-100 bg-primary">
     <div class="container py-5">
-      <div class="card shadow">
+      <div class="card shadow bg-primary">
         <div class="card-body">
           <div class="d-flex justify-content-between mb-3">
             <h3>Links Favoritos</h3>
@@ -69,9 +84,7 @@
         initDB();
       });
 
-      /* =======================
-   IndexedDB
-======================= */
+      /* ======================= IndexedDB ======================= */
       function initDB() {
         const request = indexedDB.open(dbName, 1);
 
