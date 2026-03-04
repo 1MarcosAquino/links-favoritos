@@ -1,125 +1,218 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8" />
-        <link rel="stylesheet" href="./src/styles/index.css" />
-        <link rel="icon" type="image/png" href="./src/assets/logo.png" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
-            rel="stylesheet"
-        />
-        <title>ATALHOS</title>
-    </head>
-    <body>
-        <header>
-            <ul class="containerMenu"></ul>
-        </header>
-        <main class="container">
-            <aside class="coresContainer">
-                <h2 style="text-align: center">Background Gradient</h2>
-                <textarea id="backGround"></textarea>
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Links Favoritos</title>
 
-                <div class="cores">
-                    <label for="gradient-type">Radial</label>
-                    <input type="radio" name="gradient-type" id="radial" />
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-                    <label for="gradient-type">Linear</label>
-                    <input
-                        type="radio"
-                        name="gradient-type"
-                        id="linear"
-                        checked
-                    />
+    <!-- DataTables -->
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+  </head>
 
-                    <label>DEG</label>
-                    <input id="deg" type="range" min="0" max="180" />
-                </div>
+  <body>
+    <div class="container py-5">
+      <div class="card shadow">
+        <div class="card-body">
+          <div class="d-flex justify-content-between mb-3">
+            <h3>Links Favoritos</h3>
+            <button id="btnAdd" class="btn btn-primary">+ Adicionar</button>
+          </div>
 
-                <p for="">Escolha as cores aqui!</p>
-                <div class="cores">
-                    <label>Cor 1</label>
-                    <input id="cor1" type="color" />
-                    <input id="valor1" type="range" min="0" max="100" />
-                </div>
-                <div class="cores">
-                    <label>Cor 2</label>
-                    <input id="cor2" type="color" />
-                    <input id="valor2" type="range" min="0" max="100" />
-                </div>
-            </aside>
+          <table id="dataTable" class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Link</th>
+                <th>Categoria</th>
+                <th width="150">Ações</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-            <aside class="sombraContainer">
-                <h2 style="text-align: center">Box Shandow</h2>
-                <textarea id="bordas"></textarea>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-                <div class="sombra">
-                    <label for="horizontal"
-                        >Escolha a cor da sombra Aqui!</label
-                    >
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-                    <input type="color" name="box-color" id="box-color" />
-                </div>
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-                <div class="sombra">
-                    <label for="horizontal">Horizontal</label>
-                    <input
-                        min="-100"
-                        max="100"
-                        type="range"
-                        name="horizontal"
-                        id="horizontal"
-                    />
-                </div>
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-                <div class="sombra">
-                    <label for="vertical">Vertical</label>
-                    <input
-                        min="-100"
-                        max="100"
-                        type="range"
-                        name="vertical"
-                        id="vertical"
-                    />
-                </div>
+    <script>
+      let db;
+      let table;
 
-                <div class="sombra">
-                    <label for="espalhar">Espalhar</label>
-                    <input
-                        min="0"
-                        max="100"
-                        type="range"
-                        name="tamanho"
-                        id="tamanho"
-                    />
-                </div>
+      const dbName = 'crudDB';
+      const storeName = 'links';
 
-                <div class="sombra">
-                    <label for="tamanho">Tamanho</label>
-                    <input
-                        min="-100"
-                        max="100"
-                        type="range"
-                        name="espalhar"
-                        id="espalhar"
-                    />
-                </div>
+      $(function () {
+        // Inicializa DataTable
+        table = $('#dataTable').DataTable({
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json',
+          },
+        });
 
-                <div class="sombra">
-                    <label for="opacidade">Opacidade</label>
-                    <input
-                        min="1"
-                        max="99"
-                        type="range"
-                        name="opacidade"
-                        id="opacidade"
-                    />
-                </div>
-            </aside>
-        </main>
+        initDB();
+      });
 
-        <script type="module" src="src/scripts/script.js"></script>
-        <script type="module" src="src/scripts/index.js"></script>
-    </body>
+      /* =======================
+   IndexedDB
+======================= */
+      function initDB() {
+        const request = indexedDB.open(dbName, 1);
+
+        request.onupgradeneeded = function (e) {
+          db = e.target.result;
+          if (!db.objectStoreNames.contains(storeName)) {
+            db.createObjectStore(storeName, {
+              keyPath: 'id',
+              autoIncrement: true,
+            });
+          }
+        };
+
+        request.onsuccess = function (e) {
+          db = e.target.result;
+          loadData();
+        };
+
+        request.onerror = function () {
+          alert('Erro ao abrir banco.');
+        };
+      }
+
+      /* ======================= Carregar Dados ======================= */
+      function loadData() {
+        table.clear();
+
+        const tx = db.transaction(storeName, 'readonly');
+        const store = tx.objectStore(storeName);
+
+        const rows = [];
+
+        store.openCursor().onsuccess = function (e) {
+          const cursor = e.target.result;
+
+          if (cursor) {
+            const item = cursor.value;
+
+            rows.push([
+              item.id,
+              `<a href="${item.link}" target="_blank" rel="noopener">${item.text}</a>`,
+              item.category,
+              `
+        <button class="btn btn-sm btn-warning edit" data-id="${item.id}">Editar</button>
+        <button class="btn btn-sm btn-danger remove" data-id="${item.id}">Remover</button>
+        `,
+            ]);
+
+            cursor.continue();
+          } else {
+            table.rows.add(rows).draw();
+          }
+        };
+      }
+
+      /* ======================= Adicionar ======================= */
+      $('#btnAdd').on('click', function () {
+        Swal.fire({
+          title: 'Adicionar Link',
+          html: `
+      <input id="link" class="form-control mb-2" placeholder="https://exemplo.com">
+      <input id="text" class="form-control mb-2" placeholder="Texto">
+      <input id="category" class="form-control" placeholder="Categoria">
+    `,
+          showCancelButton: true,
+          confirmButtonText: 'Salvar',
+          preConfirm: () => {
+            const link = $('#link').val().trim();
+            const text = $('#text').val().trim();
+            const category = $('#category').val().trim();
+
+            if (!link || !text) {
+              Swal.showValidationMessage('Preencha os campos obrigatórios');
+              return false;
+            }
+
+            return { link, text, category };
+          },
+        }).then(result => {
+          if (result.isConfirmed) {
+            const tx = db.transaction(storeName, 'readwrite');
+            const store = tx.objectStore(storeName);
+
+            store.add(result.value);
+
+            tx.oncomplete = loadData;
+          }
+        });
+      });
+
+      /* ======================= Editar ======================= */
+      $('#dataTable').on('click', '.edit', function () {
+        const id = Number($(this).data('id'));
+
+        const tx = db.transaction(storeName, 'readonly');
+        const objectStore = tx.objectStore(storeName);
+
+        const request = objectStore.get(id);
+
+        request.onsuccess = function () {
+          const item = request.result;
+
+          Swal.fire({
+            title: 'Editar',
+            html: `
+        <input id="link" class="form-control mb-2" value="${item.link}">
+        <input id="text" class="form-control mb-2" value="${item.text}">
+        <input id="category" class="form-control" value="${item.category}">
+      `,
+            showCancelButton: true,
+            confirmButtonText: 'Salvar',
+          }).then(result => {
+            if (result.isConfirmed) {
+              const updatedData = {
+                id: item.id,
+                link: $('#link').val(),
+                text: $('#text').val(),
+                category: $('#category').val(),
+              };
+
+              const txUpdate = db.transaction(storeName, 'readwrite');
+              txUpdate.objectStore(storeName).put(updatedData);
+              txUpdate.oncomplete = loadData;
+            }
+          });
+        };
+      });
+
+      /* ======================= Remover ======================= */
+      $('#dataTable').on('click', '.remove', function () {
+        const id = Number($(this).data('id'));
+
+        Swal.fire({
+          title: 'Remover?',
+          icon: 'warning',
+          showCancelButton: true,
+        }).then(result => {
+          if (result.isConfirmed) {
+            const tx = db.transaction(storeName, 'readwrite');
+            tx.objectStore(storeName).delete(id);
+            tx.oncomplete = loadData;
+          }
+        });
+      });
+    </script>
+  </body>
 </html>
